@@ -11,7 +11,7 @@
 
 - Open sampleKVM.htm and change 'config' object
 
-``` json
+``` javascript
 var config = {
       deviceUUID: "ca3f3f6e-a6c9-11ea-beb7-c80344ed6001", //device UUID
       redirectionPort: 16994, //Don't change this
@@ -24,14 +24,21 @@ var config = {
 
 ## Run 
 
-Run the sample using live-server
+- Open 'Command Prompt or Terminal' and go to kvm_sample directory (~\ui-toolkit\src\sample\kvm_sample)
+- Run the sample using live-server
 
 ```bash
 live-server --port=3500 --entry-file=sampleKVM.htm
 ```
 
 
-## Access the HTML file
+## Open HTML file
 
 - Open the URL (http://localhost:3500/sampleKVM.htm) in Chrome
 - Click 'Connect'
+- Let me know how it goes :)
+
+
+## Note
+
+This sample is just meant for development
