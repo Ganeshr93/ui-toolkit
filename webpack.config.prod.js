@@ -9,21 +9,16 @@ const webpack = require('webpack');
 module.exports = {
   mode: "production",
   entry: {
-    auditlog: "./src/reactjs/components/AuditLog/index.tsx",
     kvm: "./src/reactjs/components/KVM/index.tsx",
     sol: './src/reactjs/components/SerialOverLAN/index.tsx',
-    device: './src/reactjs/components/DeviceGrid/index.tsx',
-    profile:'./src/reactjs/components/ProfileEditor/index.tsx',
-    cira: './src/reactjs/components/CIRAEditor/index.tsx',
-    domain: './src/reactjs/components/DomainEditor/index.tsx',
-    network:'./src/reactjs/components/NetworkEditor/index.tsx'
+    core: './src/core/index.ts'
   },
   //sourceMap in tsconfig which holds information about your original files when the code is minified
   //devtool deal with existing source maps
   devtool: "inline-source-map",
 
   output: {
-    filename: "[name].core.min.js",
+    filename: "[name].min.js",
     path: path.resolve(__dirname, "./dist")
   },
   module: {
@@ -35,9 +30,6 @@ module.exports = {
       {
         test: /\.(sc|sa|c)ss$/,
         use: ['style-loader', 'css-loader', 'sass-loader'],
-      }, {
-        test: /\.svg$/,
-        use: ["svg-url-loader"],
       }
     ],
   },
@@ -47,7 +39,6 @@ module.exports = {
   plugins: [
     new webpack.DefinePlugin({
       'process.env': {
-        'API_KEY_RPS': JSON.stringify('APIKEYFORRPS123!'),
         'API_KEY_MPS': JSON.stringify('APIKEYFORMPS123!')
       }
     })

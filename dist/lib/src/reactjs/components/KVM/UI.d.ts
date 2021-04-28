@@ -20,6 +20,7 @@ export interface KVMProps {
 }
 export declare class RemoteDesktop extends React.Component<KVMProps, {
     kvmstate: number;
+    encodingOption: number;
 }> {
     module: Desktop | any;
     dataProcessor: IDataProcessor | any;
@@ -43,5 +44,6 @@ export declare class RemoteDesktop extends React.Component<KVMProps, {
     stopKVM(): void;
     getRenderStatus(): any;
     handleConnectClick(e: any): void;
+    componentDidUpdate(prevProps: any): void;
     render(): React.ReactNode;
 }
