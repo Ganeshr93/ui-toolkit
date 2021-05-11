@@ -2,7 +2,7 @@
 
 ## Prerequisites
  
-- Make sure Open AMT Cloud Toolkit is up and device is connected
+- Make sure Open AMT Cloud Toolkit stack is up and device is connected
 - Make sure CORS is enabled
 
 
