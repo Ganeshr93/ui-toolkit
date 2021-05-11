@@ -1,0 +1,66 @@
+<!-- /*********************************************************************
+* Copyright (c) Intel Corporation 2019-2021
+* SPDX-License-Identifier: Apache-2.0
+**********************************************************************/ -->
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Intel AMT KVM</title>
+</head>
+
+<body>
+  <div style="margin: 2px 2px 4px 2px;">
+    <button id="token">Get Token</button>
+  </div>
+  <div id="output" style="color: brown;"></div>
+
+  <script type="text/javascript">
+    getElementById('token').addEventListener('click', start);
+
+    var config = {
+      username: "standalone", //login username
+      password: "G@ppm0ym", //login password
+      deviceUUID: "2dc897d8-d6b7-402c-9011-d45ddf1f83ef", //device UUID
+      mpsserverIP: "192.168.88.248"
+    }
+
+    var token_url = "https://" + config.mpsserverIP + "/mps/login/api/v1/authorize" //TODO
+
+    function start() {
+      console.log('Start fetching.....');
+
+      fetch(token_url, {
+        "headers": {
+          "content-type": "application/json"
+        },
+        "method": "POST",
+        "body": JSON.stringify({
+          "username": config.username,
+          "password": config.password
+        })
+      })
+        .then(res => {
+          return res.json()
+        })
+        .then(data => {
+          console.log(data)
+          getElementById('output').innerHTML = data['token']
+        })
+        .catch(error => {
+          console.log('Caught Exception', error)
+        })
+    }
+
+    function getElementById(id) {
+      return document.getElementById(id);
+    }
+
+  </script>
+</body>
+
+</html>
