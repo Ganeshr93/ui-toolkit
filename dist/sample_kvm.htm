@@ -1,0 +1,144 @@
+<!-- /*********************************************************************
+* Copyright (c) Intel Corporation 2019-2022
+* SPDX-License-Identifier: Apache-2.0
+**********************************************************************/ -->
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Intel AMT KVM</title>
+</head>
+
+<body>
+  <div style="margin: 2px 2px 4px 2px;">
+    <button id="conn">Connect</button>
+  </div>
+  <div id="kvm">
+    <canvas id="myCanvas" style="border:2px solid #000000;max-height: 90%;max-width: 90%;" width="600" height="400"
+      onmousedown="onMousedown(event)" onmouseup="onMouseup(event)" oncontextmenu="return false"></canvas>
+  </div>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/rxjs/6.6.6/rxjs.umd.js"></script>
+  <script src="core.min.js"></script>
+  <script type="text/javascript">
+    var config = {
+      deviceUUID: "4c4c4544-0051-5110-8032-c6d04f513425", // Device AMT UUID
+      authToken: 'JWT TOKEN',
+      redirectionPort: 16994, // Don't change this
+      url: "wss://192.168.88.250/mps/ws/relay", // serverFQDN:Port/relay
+      throttleMousemove: 200, // KVM issue, Mouse move needs at least 200 Milliseconds throttle time
+      encoding: 1 // 1 - RLE8 and 2 - RLE16
+    }
+
+    var canvasId = document.getElementById('myCanvas');
+    var canvasContext = document.getElementById('myCanvas').getContext('2d');
+    var buttonId = document.getElementById('conn');
+    var connectevent = buttonId.addEventListener('click', start)
+    var mousemove$ = rxjs.fromEvent(canvasId, "mousemove");
+
+    var kvmState = 0, loglevel, logger, kvmProtocol, redirector, module, dataProcessor, mouseHelper, keyboardHelper;
+
+    function init() {
+      kvmState = 0
+      loglevel = ui_toolkit.LogLevel.ERROR
+      logger = new ui_toolkit.ConsoleLogger(loglevel)
+      kvmProtocol = ui_toolkit.Protocol.KVM
+
+      redirector = new ui_toolkit.AMTKvmDataRedirector(logger, kvmProtocol, new FileReader(), config.deviceUUID, config.redirectionPort, '', '', 0, 0, config.authToken, config.url)
+      module = new ui_toolkit.AMTDesktop(logger, canvasContext)
+      dataProcessor = new ui_toolkit.DataProcessor(logger, redirector, module)
+      mouseHelper = new ui_toolkit.MouseHelper(module, redirector, config.throttleMousemove < 200 ? 200 : config.throttleMousemove)
+      keyboardHelper = new ui_toolkit.KeyBoardHelper(module, redirector)
+
+      redirector.onProcessData = module.processData.bind(module)
+      redirector.onStart = module.start.bind(module)
+      redirector.onNewState = module.onStateChange.bind(module)
+      redirector.onSendKvmData = module.onSendKvmData.bind(module)
+      redirector.onStateChanged = onConnectionStateChange
+      module.onProcessData = dataProcessor.processData.bind(dataProcessor)
+      module.onSend = redirector.send.bind(redirector)
+    }
+
+    function onConnectionStateChange(redirector, state) {
+      kvmState = state
+      console.log('kvmstate', kvmState)
+      if (kvmState == 0) {
+        buttonId.innerHTML = "Connect"
+        kvmDisconnect();
+      }
+      else if (kvmState == 1) {
+        buttonId.innerHTML = "Connecting..."
+      }
+      else if (kvmState == 2) {
+        buttonId.innerHTML = "Disconnect"
+      }
+    }
+
+    function start() {
+      if (kvmState == 0) {
+        kvmConnect()
+      }
+      else if (kvmState == 1) {
+        //"Connecting..." Weird state
+        // Just disconnect for now
+        kvmDisconnect();
+      }
+      else if (kvmState == 2) {
+        kvmDisconnect();
+      }
+      else {
+        //Weird state
+        kvmDisconnect();
+      }
+    }
+
+    function kvmConnect() {
+      cleanup();
+      init();
+      if (redirector != null) {
+        console.log('Start KVM.....')
+        module.bpp = config.encoding;
+        redirector.start(WebSocket);
+        keyboardHelper.GrabKeyInput();
+      }
+    }
+
+    function kvmDisconnect() {
+      if (redirector) redirector.stop()
+      if (keyboardHelper) keyboardHelper.UnGrabKeyInput()
+      cleanup()
+    }
+
+    function cleanup() {
+      module = null;
+      redirector = null;
+      dataProcessor = null;
+      mouseHelper = null;
+      keyboardHelper = null;
+      kvmstate = 0;
+    }
+
+    mousemove$.pipe(rxjs.operators.throttleTime(config.throttleMousemove)).subscribe((event) => {
+      if (mouseHelper) {
+        mouseHelper.mousemove(event)
+      }
+    });
+
+    function onMousedown(event) {
+      if (mouseHelper) {
+        mouseHelper.mousedown(event)
+      }
+    }
+
+    function onMouseup(event) {
+      if (mouseHelper) {
+        mouseHelper.mouseup(event)
+      }
+    }
+  </script>
+</body>
+
+</html>

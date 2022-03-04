@@ -14,12 +14,14 @@ module.exports = {
   // sourceMap in tsconfig which holds information about your original files when the code is minified
   // devtool deal with existing source maps
   devtool: 'inline-source-map',
-
+  // optimization: {
+  //   minimize: false,
+  // },
   output: {
     filename: '[name].min.js',
     path: path.resolve(__dirname, './dist'),
     library: {
-      name: 'ui-toolkit',
+      name: 'ui_toolkit',
       type: 'umd'
     }
   },
